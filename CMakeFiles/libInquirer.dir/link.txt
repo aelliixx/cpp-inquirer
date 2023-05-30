@@ -1,2 +1,0 @@
-/usr/bin/ar qc liblibInquirer.a CMakeFiles/libInquirer.dir/src/inquirer.cpp.o
-/usr/bin/ranlib liblibInquirer.a
