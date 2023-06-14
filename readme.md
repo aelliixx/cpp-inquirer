@@ -57,14 +57,6 @@ inquirer.add_question({ "type", "What kind of a cake would you like?",
 inquirer.add_question({ "delivery", "Is this for delivery?", alx::Type::confirm });
 ```
 
-## Confirm
-
-![](assets/confirm-input.png)
-
-```cpp
-inquirer.add_question({ "delivery", "Is this for delivery?", alx::Type::confirm });
-```
-
 ## Regex validated input
 
 ![](assets/regex-input.png)
