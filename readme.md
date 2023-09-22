@@ -13,6 +13,9 @@ And initialise the inquirer object (with optional title):
 auto inquirer = alx::Inquirer("cpp-inquirer example");
 ```
 
+To get the answers back, call `inquirer.answer("some key");` with the key of your question.
+You will get a `std::string` for as a value, so you will need to convert it to an approapriate type yourself.
+
 # Propmts
 
 ## Text
@@ -64,3 +67,18 @@ inquirer.add_question({ "delivery", "Is this for delivery?", alx::Type::confirm 
 ```cpp
 inquirer.add_question({ "number", "Enter your contact details:", "\\d{9}" });
 ```
+
+# Contributing
+
+I'm more than happy to accept pull requests with some minor requirements:
+
+- Prefix your commit messages with a relevant change type. If the commit relates to a GitHub issue, include the issue number in the message. Example:
+> Types: added a new question type 'yes/no'
+> 
+> This addresses issue #123
+
+or
+
+> Answers: added a way to return an answer with the correct type
+
+- Please follow the naming convention already established in the code. There is no clangformat, but I'm sure you can deduce it yourself.
