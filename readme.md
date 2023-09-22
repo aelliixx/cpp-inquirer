@@ -14,7 +14,7 @@ auto inquirer = alx::Inquirer("cpp-inquirer example");
 ```
 
 To get the answers back, call `inquirer.answer("some key");` with the key of your question.
-You will get a `std::string` for as a value, so you will need to convert it to an approapriate type yourself.
+You will get a `std::string` as a value, so you will need to convert it to an approapriate type yourself.
 
 # Propmts
 
