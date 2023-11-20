@@ -24,6 +24,11 @@
 #include <regex>
 #include <cassert>
 
+#ifdef _WIN32
+	#include <conio.h>
+#endif
+
+
 namespace alx {
 class Inquirer;
 
@@ -82,12 +87,8 @@ private:
 	std::string m_question;
 	std::string m_answer;
 	Type m_type;
-
-	union
-	{
-		std::vector<std::string> m_options;
-		std::string m_regex;
-	};
+	std::vector<std::string> m_options;
+	std::string m_regex;
 };
 
 class Inquirer
@@ -167,17 +168,17 @@ public:
 				bool position = true;
 				while (true) {
 					const int key = getch();
-					if (key == 68) {
+					if (key == Inquirer::keySx) {
 						position = true;
 						erase_lines(2);
 						printQuestion(yes);
 					}
-					else if (key == 67) {
+					else if (key == Inquirer::keyDx) {
 						position = false;
 						erase_lines(2);
 						printQuestion(no);
 					}
-					if (key == 13) {
+					if (key == Inquirer::keyEnter) {
 						q.m_answer = position ? "yes" : "no";
 						break;
 					}
@@ -200,19 +201,19 @@ public:
 
 				while (true) {
 					const int key = getch();
-					if (key == 66) {
+					if (key == Inquirer::keyDw) {
 						selectedIndex = wrap_int(selectedIndex + 1, 0, q.m_options.size() - 1);
 						erase_lines(q.m_options.size() + 2);
 						printQuestion();
 						printOptions();
 					}
-					else if (key == 65) {
+					else if (key == Inquirer::keyUp) {
 						selectedIndex = wrap_int(selectedIndex - 1, 0, q.m_options.size() - 1);
 						erase_lines(q.m_options.size() + 2);
 						printQuestion();
 						printOptions();
 					}
-					if (key == 13) {
+					if (key == Inquirer::keyEnter) {
 						q.m_answer = q.m_options.at(selectedIndex);
 						erase_lines(q.m_options.size() + 2);
 						printQuestion("\033[34m" + q.m_options.at(selectedIndex) + "\033[0m\n");
@@ -259,6 +260,20 @@ public:
 	}
 
 private:
+	#ifdef _WIN32
+		static int const keyDw = 80;
+		static int const keyUp = 72;
+		static int const keySx = 75;
+		static int const keyDx = 77;
+		static int const keyEnter = 13;
+	#else
+		static int const keyUp = 65;
+		static int const keyDw = 66;
+		static int const keySx = 68;
+		static int const keyDx = 67;
+		static int const keyEnter = 13;
+	#endif
+
 	static void erase_lines(const unsigned count = 1)
 	{
 		if (count == 0)
@@ -300,13 +315,18 @@ private:
 
 	static int getch()
 	{
-		// This function should return the keystroke without allowing it to echo on screen
+		int c; // This function should return the keystroke without allowing it to echo on screen
 
-		system("stty raw"); // Raw input - wait for only a single keystroke
-		system("stty -echo"); // Echo off
-		const int c = getchar();
-		system("stty cooked"); // Cooked input - reset
-		system("stty echo"); // Echo on - Reset
+		#ifdef _WIN32
+			c = _getch();
+		#else
+			system("stty raw");    // Raw input - wait for only a single keystroke
+			system("stty -echo");  // Echo off
+			c = getchar();
+			system("stty cooked"); // Cooked input - reset
+			system("stty echo");   // Echo on - Reset
+		#endif
+
 		return c;
 	}
 };
