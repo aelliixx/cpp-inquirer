@@ -25,11 +25,13 @@
 #include <cassert>
 
 #ifdef _WIN32
-	#include <conio.h>
+#include <conio.h>
 #endif
 
-
 namespace alx {
+
+#define CTRL_KEYPRESS(k) ((k)  & 0x1f)
+
 class Inquirer;
 
 enum class Type
@@ -317,16 +319,17 @@ private:
 	{
 		int c; // This function should return the keystroke without allowing it to echo on screen
 
-		#ifdef _WIN32
-			c = _getch();
-		#else
-			system("stty raw");    // Raw input - wait for only a single keystroke
-			system("stty -echo");  // Echo off
-			c = getchar();
-			system("stty cooked"); // Cooked input - reset
-			system("stty echo");   // Echo on - Reset
-		#endif
-
+#ifdef _WIN32
+		c = _getch();
+#else
+		system("stty raw");    // Raw input - wait for only a single keystroke
+		system("stty -echo");  // Echo off
+		c = getchar();
+		system("stty cooked"); // Cooked input - reset
+		system("stty echo");   // Echo on - Reset
+#endif
+		if (c == CTRL_KEYPRESS('c') || c == CTRL_KEYPRESS('d'))
+			exit(0);
 		return c;
 	}
 };
