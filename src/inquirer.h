@@ -145,11 +145,13 @@ public:
 				printQuestion();
 				takeInput(q.m_answer);
 				break;
-			case Type::integer: {
+			case Type::integer:
+			{
 				printQuestion();
 				std::string answer;
 				takeInput(answer);
-				while (!is_integer(answer)) {
+				while (!is_integer(answer))
+				{
 					erase_lines(2);
 					printQuestion();
 					takeInput(answer);
@@ -157,11 +159,13 @@ public:
 				q.m_answer = answer;
 				break;
 			}
-			case Type::decimal: {
+			case Type::decimal:
+			{
 				printQuestion();
 				std::string answer;
 				takeInput(answer);
-				while (!is_decimal(answer)) {
+				while (!is_decimal(answer))
+				{
 					erase_lines(2);
 					printQuestion();
 					takeInput(answer);
@@ -169,60 +173,72 @@ public:
 				q.m_answer = answer;
 				break;
 			}
-			case Type::yesNo: {
+			case Type::yesNo:
+			{
 				const std::string yes = "\033[34myes\033[0m no\n";
 				const std::string no = "yes \033[34mno\033[0m\n";
 				std::cout << std::flush;
 				printQuestion(yes);
 				bool position = true;
-				while (true) {
+				while (true)
+				{
 					const int key = getch();
-					if (key == Inquirer::keySx) {
+					if (key == Inquirer::keySx)
+					{
 						position = true;
 						erase_lines(2);
 						printQuestion(yes);
 					}
-					else if (key == Inquirer::keyDx) {
+					else if (key == Inquirer::keyDx)
+					{
 						position = false;
 						erase_lines(2);
 						printQuestion(no);
 					}
-					if (key == Inquirer::keyEnter) {
+					if (key == Inquirer::keyEnter)
+					{
 						q.m_answer = position ? "yes" : "no";
 						break;
 					}
 				}
 				break;
 			}
-			case Type::options: {
+			case Type::options:
+			{
 				unsigned int selectedIndex = 0;
-				auto printOptions = [&]() {
-					std::cout << '\n';
-					for (int i = 0; i < q.m_options.size(); ++i) {
-						if (i == selectedIndex)
-							std::cout << "\033[34m> " << q.m_options.at(i) << "\033[0m\n";
-						else
-							std::cout << "  " << q.m_options.at(i) << "\n";
-					}
+				auto printOptions = [&]()
+				{
+				  std::cout << '\n';
+				  for (int i = 0; i < q.m_options.size(); ++i)
+				  {
+					  if (i == selectedIndex)
+						  std::cout << "\033[34m> " << q.m_options.at(i) << "\033[0m\n";
+					  else
+						  std::cout << "  " << q.m_options.at(i) << "\n";
+				  }
 				};
 				printQuestion();
 				printOptions();
 
-				while (true) {
+				while (true)
+				{
 					const int key = getch();
-					if (key == Inquirer::keyDw) {
+					if (key == Inquirer::keyDw)
+					{
 						selectedIndex = wrap_int(selectedIndex + 1, 0, q.m_options.size() - 1);
 						erase_lines(q.m_options.size() + 2);
 						printQuestion();
 						printOptions();
 					}
-					else if (key == Inquirer::keyUp) {
+					else if (key == Inquirer::keyUp)
+					{
 						selectedIndex = wrap_int(selectedIndex - 1, 0, q.m_options.size() - 1);
 						erase_lines(q.m_options.size() + 2);
 						printQuestion();
 						printOptions();
 					}
-					if (key == Inquirer::keyEnter) {
+					if (key == Inquirer::keyEnter)
+					{
 						q.m_answer = q.m_options.at(selectedIndex);
 						erase_lines(q.m_options.size() + 2);
 						printQuestion("\033[34m" + q.m_options.at(selectedIndex) + "\033[0m\n");
@@ -231,11 +247,13 @@ public:
 				}
 				break;
 			}
-			case Type::regex: {
+			case Type::regex:
+			{
 				printQuestion();
 				std::string answer;
 				takeInput(answer);
-				while (!std::regex_match(answer, std::regex(q.m_regex))) {
+				while (!std::regex_match(answer, std::regex(q.m_regex)))
+				{
 					erase_lines(2);
 					printQuestion();
 					takeInput(answer);
@@ -249,7 +267,8 @@ public:
 
 	void print_questions() const
 	{
-		for (const auto& q : m_questions) {
+		for (const auto& q : m_questions)
+		{
 			std::cout << q.second.m_question << " " << static_cast<int>(q.second.m_type) << '\n';
 		}
 	}
@@ -269,19 +288,19 @@ public:
 	}
 
 private:
-	#ifdef _WIN32
-		static int const keyDw = 80;
-		static int const keyUp = 72;
-		static int const keySx = 75;
-		static int const keyDx = 77;
-		static int const keyEnter = 13;
-	#else
-		static int const keyUp = 65;
-		static int const keyDw = 66;
-		static int const keySx = 68;
-		static int const keyDx = 67;
-		static int const keyEnter = 13;
-	#endif
+#ifdef _WIN32
+	static int const keyDw = 80;
+	static int const keyUp = 72;
+	static int const keySx = 75;
+	static int const keyDx = 77;
+	static int const keyEnter = 13;
+#else
+	static int const keyUp = 65;
+	static int const keyDw = 66;
+	static int const keySx = 68;
+	static int const keyDx = 67;
+	static int const keyEnter = 13;
+#endif
 
 	static void erase_lines(const unsigned count = 1)
 	{
@@ -289,9 +308,10 @@ private:
 			return;
 
 		std::cout << "\x1b[2K"; // Delete current line
-		for (int i = 1; i < count; ++i) {
+		for (int i = 1; i < count; ++i)
+		{
 			std::cout << "\x1b[1A" // Move cursor one line up
-				<< "\x1b[2K"; // Delete current line
+					  << "\x1b[2K"; // Delete current line
 		}
 		std::cout << '\r';
 	}
