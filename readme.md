@@ -12,11 +12,42 @@ And initialise the inquirer object (with optional title):
 ```cpp
 auto inquirer = alx::Inquirer("cpp-inquirer example");
 ```
+There are two ways to get answers back:
 
-To get the answers back, call `inquirer.answer("some key");` with the key of your question.
-You will get a `std::string` as a value, so you will need to convert it to an approapriate type yourself.
+```cpp
+// Adds a question.
+inquirer.add_question({"query", "What do you want to do?" });
+// Prompts the user with all questions at once.
+inquirer.ask();
+/* With the key of your question. You will get a std::string as a value, so you will need to convert
+   it to an appropriate type yourself. */
+inquirer.answer("query"); 
+```
+or
 
-# Propmts
+```cpp
+// Adds a question and immediately prompts the user for an answer.
+std::string answer = inquirer.add_question({ "query", "What do you want to do?" }).ask();
+```
+
+If you mix both of these approaches the question already answered will not be asked again.
+If you wish to ask the same question more than once call:
+
+```cpp
+inquirer.ask(true);
+```
+
+Alternatively, if you have unrelated question or prefer to manage them individually you can use
+the `alx::Question` class directly:
+
+```cpp
+std::string answer = alx::Question{"key", "What do you want to do?"}.ask(); // Key is not used in this case, so any value will do.
+// Or
+alx::Question question{"key", "What do you want to do?"};
+std::string answer = question.ask();
+```
+
+# Prompts
 
 ## Text
 

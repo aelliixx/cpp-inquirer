@@ -32,6 +32,20 @@ namespace alx {
 
 #define CTRL_KEYPRESS(k) ((k)  & 0x1f)
 
+#ifdef _WIN32
+static int const keyDw = 80;
+	static int const keyUp = 72;
+	static int const keySx = 75;
+	static int const keyDx = 77;
+	static int const keyEnter = 13;
+#else
+static int const keyUp = 65;
+static int const keyDw = 66;
+static int const keySx = 68;
+static int const keyDx = 67;
+static int const keyEnter = 13;
+#endif
+
 class Inquirer;
 
 enum class Type
@@ -81,6 +95,163 @@ public:
 		  m_type(Type::regex),
 		  m_regex(std::move(regex)) {}
 
+	[[nodiscard]] std::string ask(const bool askAgainIfAnswered = false)
+	{
+		if (m_asked && !askAgainIfAnswered) return m_answer;
+		auto printQuestion = [&](const std::string& append = "")
+		{
+		  std::cout << "\033[1m\033[34m?\033[0m \033[1m" << m_question << "\033[0m " << append;
+		};
+
+		auto takeInput = [](std::string& destination)
+		{
+		  std::cout << "\033[34m";
+		  if (!std::getline(std::cin, destination))
+			  exit(0);
+		  std::cout << "\033[0m";
+		};
+
+		switch (m_type)
+		{
+		case Type::confirm:
+		{
+			printQuestion("(y/N) ");
+			std::string answer;
+			takeInput(answer);
+			while (!(answer == "y" || answer == "Y" || answer == "n" || answer == "N"))
+			{
+				erase_lines(2);
+				printQuestion("(y/N) ");
+				takeInput(answer);
+			}
+			m_answer = answer;
+			break;
+		}
+		case Type::text:
+			printQuestion();
+			takeInput(m_answer);
+			break;
+		case Type::integer:
+		{
+			printQuestion();
+			std::string answer;
+			takeInput(answer);
+			while (!is_integer(answer))
+			{
+				erase_lines(2);
+				printQuestion();
+				takeInput(answer);
+			}
+			m_answer = answer;
+			break;
+		}
+		case Type::decimal:
+		{
+			printQuestion();
+			std::string answer;
+			takeInput(answer);
+			while (!is_decimal(answer))
+			{
+				erase_lines(2);
+				printQuestion();
+				takeInput(answer);
+			}
+			m_answer = answer;
+			break;
+		}
+		case Type::yesNo:
+		{
+			const std::string yes = "\033[34myes\033[0m no\n";
+			const std::string no = "yes \033[34mno\033[0m\n";
+			std::cout << std::flush;
+			printQuestion(yes);
+			bool position = true;
+			while (true)
+			{
+				const int key = getch();
+				if (key == keySx)
+				{
+					position = true;
+					erase_lines(2);
+					printQuestion(yes);
+				}
+				else if (key == keyDx)
+				{
+					position = false;
+					erase_lines(2);
+					printQuestion(no);
+				}
+				if (key == keyEnter)
+				{
+					m_answer = position ? "yes" : "no";
+					break;
+				}
+			}
+			break;
+		}
+		case Type::options:
+		{
+			unsigned int selectedIndex = 0;
+			auto printOptions = [&]()
+			{
+			  std::cout << '\n';
+			  for (int i = 0; i < m_options.size(); ++i)
+			  {
+				  if (i == selectedIndex)
+					  std::cout << "\033[34m> " << m_options.at(i) << "\033[0m\n";
+				  else
+					  std::cout << "  " << m_options.at(i) << "\n";
+			  }
+			};
+			printQuestion();
+			printOptions();
+
+			while (true)
+			{
+				const int key = getch();
+				if (key == keyDw)
+				{
+					selectedIndex = wrap_int(selectedIndex + 1, 0, m_options.size() - 1);
+					erase_lines(m_options.size() + 2);
+					printQuestion();
+					printOptions();
+				}
+				else if (key == keyUp)
+				{
+					selectedIndex = wrap_int(selectedIndex - 1, 0, m_options.size() - 1);
+					erase_lines(m_options.size() + 2);
+					printQuestion();
+					printOptions();
+				}
+				if (key == keyEnter)
+				{
+					m_answer = m_options.at(selectedIndex);
+					erase_lines(m_options.size() + 2);
+					printQuestion("\033[34m" + m_options.at(selectedIndex) + "\033[0m\n");
+					break;
+				}
+			}
+			break;
+		}
+		case Type::regex:
+		{
+			printQuestion();
+			std::string answer;
+			takeInput(answer);
+			while (!std::regex_match(answer, std::regex(m_regex)))
+			{
+				erase_lines(2);
+				printQuestion();
+				takeInput(answer);
+			}
+			m_answer = answer;
+			break;
+		}
+		}
+		m_asked = true;
+		return m_answer;
+	}
+
 	~Question() {}
 
 private:
@@ -91,216 +262,7 @@ private:
 	Type m_type;
 	std::vector<std::string> m_options;
 	std::string m_regex;
-};
-
-class Inquirer
-{
-	std::vector<std::pair<std::string, Question>> m_questions;
-	std::string m_title;
-
-public:
-	explicit Inquirer(std::string title)
-		: m_title(std::move(title)) {}
-
-	void add_question(const Question& question) { m_questions.emplace_back(question.m_key, question); }
-
-	void ask()
-	{
-		if (!m_title.empty())
-			std::cout << "\033[34m>\033[0m " << m_title << '\n';
-		for (auto& question : m_questions)
-		{
-			auto& q = question.second;
-
-			auto printQuestion = [&](const std::string& append = "")
-			{
-			  std::cout << "\033[1m\033[34m?\033[0m \033[1m" << q.m_question << "\033[0m " << append;
-			};
-
-			auto takeInput = [](std::string& destination)
-			{
-			  std::cout << "\033[34m";
-			  if (!std::getline(std::cin, destination))
-				  exit(0);
-			  std::cout << "\033[0m";
-			};
-
-			switch (q.m_type)
-			{
-			case Type::confirm:
-			{
-				printQuestion("(y/N) ");
-				std::string answer;
-				takeInput(answer);
-				while (!(answer == "y" || answer == "Y" || answer == "n" || answer == "N"))
-				{
-					erase_lines(2);
-					printQuestion("(y/N) ");
-					takeInput(answer);
-				}
-				q.m_answer = answer;
-				break;
-			}
-			case Type::text:
-				printQuestion();
-				takeInput(q.m_answer);
-				break;
-			case Type::integer:
-			{
-				printQuestion();
-				std::string answer;
-				takeInput(answer);
-				while (!is_integer(answer))
-				{
-					erase_lines(2);
-					printQuestion();
-					takeInput(answer);
-				}
-				q.m_answer = answer;
-				break;
-			}
-			case Type::decimal:
-			{
-				printQuestion();
-				std::string answer;
-				takeInput(answer);
-				while (!is_decimal(answer))
-				{
-					erase_lines(2);
-					printQuestion();
-					takeInput(answer);
-				}
-				q.m_answer = answer;
-				break;
-			}
-			case Type::yesNo:
-			{
-				const std::string yes = "\033[34myes\033[0m no\n";
-				const std::string no = "yes \033[34mno\033[0m\n";
-				std::cout << std::flush;
-				printQuestion(yes);
-				bool position = true;
-				while (true)
-				{
-					const int key = getch();
-					if (key == Inquirer::keySx)
-					{
-						position = true;
-						erase_lines(2);
-						printQuestion(yes);
-					}
-					else if (key == Inquirer::keyDx)
-					{
-						position = false;
-						erase_lines(2);
-						printQuestion(no);
-					}
-					if (key == Inquirer::keyEnter)
-					{
-						q.m_answer = position ? "yes" : "no";
-						break;
-					}
-				}
-				break;
-			}
-			case Type::options:
-			{
-				unsigned int selectedIndex = 0;
-				auto printOptions = [&]()
-				{
-				  std::cout << '\n';
-				  for (int i = 0; i < q.m_options.size(); ++i)
-				  {
-					  if (i == selectedIndex)
-						  std::cout << "\033[34m> " << q.m_options.at(i) << "\033[0m\n";
-					  else
-						  std::cout << "  " << q.m_options.at(i) << "\n";
-				  }
-				};
-				printQuestion();
-				printOptions();
-
-				while (true)
-				{
-					const int key = getch();
-					if (key == Inquirer::keyDw)
-					{
-						selectedIndex = wrap_int(selectedIndex + 1, 0, q.m_options.size() - 1);
-						erase_lines(q.m_options.size() + 2);
-						printQuestion();
-						printOptions();
-					}
-					else if (key == Inquirer::keyUp)
-					{
-						selectedIndex = wrap_int(selectedIndex - 1, 0, q.m_options.size() - 1);
-						erase_lines(q.m_options.size() + 2);
-						printQuestion();
-						printOptions();
-					}
-					if (key == Inquirer::keyEnter)
-					{
-						q.m_answer = q.m_options.at(selectedIndex);
-						erase_lines(q.m_options.size() + 2);
-						printQuestion("\033[34m" + q.m_options.at(selectedIndex) + "\033[0m\n");
-						break;
-					}
-				}
-				break;
-			}
-			case Type::regex:
-			{
-				printQuestion();
-				std::string answer;
-				takeInput(answer);
-				while (!std::regex_match(answer, std::regex(q.m_regex)))
-				{
-					erase_lines(2);
-					printQuestion();
-					takeInput(answer);
-				}
-				q.m_answer = answer;
-				break;
-			}
-			}
-		}
-	}
-
-	void print_questions() const
-	{
-		for (const auto& q : m_questions)
-		{
-			std::cout << q.second.m_question << " " << static_cast<int>(q.second.m_type) << '\n';
-		}
-	}
-
-	void print_answers() const
-	{
-		for (const auto& q : m_questions)
-			std::cout << q.second.m_question << ": " << q.second.m_answer << '\n';
-	}
-
-	std::string answer(const std::string& key) const
-	{
-		for (const auto& question : m_questions)
-			if (question.first == key)
-				return question.second.m_answer;
-		return "";
-	}
-
-private:
-#ifdef _WIN32
-	static int const keyDw = 80;
-	static int const keyUp = 72;
-	static int const keySx = 75;
-	static int const keyDx = 77;
-	static int const keyEnter = 13;
-#else
-	static int const keyUp = 65;
-	static int const keyDw = 66;
-	static int const keySx = 68;
-	static int const keyDx = 67;
-	static int const keyEnter = 13;
-#endif
+	bool m_asked = false;
 
 	static void erase_lines(const unsigned count = 1)
 	{
@@ -359,6 +321,57 @@ private:
 			exit(0);
 		return c;
 	}
+};
+
+class Inquirer
+{
+	std::vector<std::pair<std::string, Question>> m_questions;
+	std::string m_title;
+
+public:
+	explicit Inquirer(std::string title)
+		: m_title(std::move(title)) {}
+
+	Question& add_question(const Question& question)
+	{
+		m_questions.emplace_back(question.m_key, question);
+		return m_questions.at(m_questions.size() - 1).second;
+	}
+
+	void ask(const bool askAgainIfAnswered = false)
+	{
+		if (!m_title.empty())
+			std::cout << "\033[34m>\033[0m " << m_title << '\n';
+		for (auto& question : m_questions)
+		{
+			(void)question.second.ask(askAgainIfAnswered);
+		}
+	}
+
+	void print_questions() const
+	{
+		for (const auto& q : m_questions)
+		{
+			std::cout << q.second.m_question << " " << static_cast<int>(q.second.m_type) << '\n';
+		}
+	}
+
+	void print_answers() const
+	{
+		for (const auto& q : m_questions)
+			std::cout << q.second.m_question << ": " << q.second.m_answer << '\n';
+	}
+
+	std::string answer(const std::string& key) const
+	{
+		for (const auto& question : m_questions)
+			if (question.first == key)
+				return question.second.m_answer;
+		return "";
+	}
+
+private:
+
 };
 }
 #endif //CPP_INQUIRER_SRC_INQUIRER_H
