@@ -108,25 +108,32 @@ public:
 	{
 		if (!m_title.empty())
 			std::cout << "\033[34m>\033[0m " << m_title << '\n';
-		for (auto& question : m_questions) {
+		for (auto& question : m_questions)
+		{
 			auto& q = question.second;
 
-			auto printQuestion = [&](const std::string& append = "") {
-				std::cout << "\033[1m\033[34m?\033[0m \033[1m" << q.m_question << "\033[0m " << append;
+			auto printQuestion = [&](const std::string& append = "")
+			{
+			  std::cout << "\033[1m\033[34m?\033[0m \033[1m" << q.m_question << "\033[0m " << append;
 			};
 
-			auto takeInput = [](std::string& destination) {
-				std::cout << "\033[34m";
-				std::getline(std::cin, destination);
-				std::cout << "\033[0m";
+			auto takeInput = [](std::string& destination)
+			{
+			  std::cout << "\033[34m";
+			  if (!std::getline(std::cin, destination))
+				  exit(0);
+			  std::cout << "\033[0m";
 			};
 
-			switch (q.m_type) {
-			case Type::confirm: {
+			switch (q.m_type)
+			{
+			case Type::confirm:
+			{
 				printQuestion("(y/N) ");
 				std::string answer;
 				takeInput(answer);
-				while (!(answer == "y" || answer == "Y" || answer == "n" || answer == "N")) {
+				while (!(answer == "y" || answer == "Y" || answer == "n" || answer == "N"))
+				{
 					erase_lines(2);
 					printQuestion("(y/N) ");
 					takeInput(answer);
