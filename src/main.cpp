@@ -11,7 +11,8 @@ int main()
 	inquirer.add_question({ "type", "What kind of a cake would you like?",
 							 std::vector<std::string>{ "Chocolate", "Ice-cream", "Cheesecake", "Red velvet" }});
 	inquirer.add_question({ "delivery", "Is this for delivery?", alx::Type::confirm });
-	inquirer.add_question({ "number", "Enter your contact details:", "\\d{9}" });
+	inquirer.add_question({ "number", "Enter your contact details", "\\d{9}" });
+	inquirer.add_question({"password", "Enter your password", alx::Type::password});
 	inquirer.ask();
 	std::cout << "------------\n";
 	inquirer.print_questions();
