@@ -99,6 +99,15 @@ inquirer.add_question({ "delivery", "Is this for delivery?", alx::Type::confirm 
 inquirer.add_question({ "number", "Enter your contact details:", "\\d{9}" });
 ```
 
+## Password
+
+Password questions hide user input.
+
+![](assets/password.png)
+```cpp
+inquirer.add_question({ "number", "Enter your contact details:", alx::Type::password });
+```
+
 # Contributing
 
 I'm more than happy to accept pull requests with some minor requirements:
