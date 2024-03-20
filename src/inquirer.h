@@ -277,6 +277,8 @@ public:
 		return m_answer;
 	}
 
+	[[nodiscard]] std::string get_answer() const { return m_answer; }
+	
 	~Question() {}
 
 private:
@@ -434,9 +436,6 @@ public:
 				return question.second.m_answer;
 		return "";
 	}
-
-private:
-
 };
 }
 #endif //CPP_INQUIRER_SRC_INQUIRER_H
