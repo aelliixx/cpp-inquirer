@@ -362,6 +362,19 @@ public:
 		m_questions.emplace_back(question.m_key, question);
 		return m_questions.at(m_questions.size() - 1).second;
 	}
+	
+	Question& get_question(const std::string key)
+	{
+		auto found = std::find_if(m_questions.begin(), m_questions.end(), [&](std::pair<std::basic_string<char>,
+																						Question>& question){
+			if (question.second.m_key == key)
+				return true;
+			return false;
+		});
+		if (found != m_questions.end())
+			return found->second;
+		throw std::runtime_error("No question with key: " + key);
+	}
 
 	void ask(const bool askAgainIfAnswered = false)
 	{
