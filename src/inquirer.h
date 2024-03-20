@@ -45,7 +45,7 @@ static int const keySx = 68;
 static int const keyDx = 67;
 static int const keyEnter = 13;
 #endif
-static int const keyBackspace = 127;
+static int const keyBackspace = 127; // TODO: is this also correct on Windows and other platforms?
 
 class Inquirer;
 
