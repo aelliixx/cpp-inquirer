@@ -240,9 +240,11 @@ public:
 			printQuestion();
 			std::string answer;
 			int c;
-			while (c != keyEnter)
+			while (true)
 			{
 				c = getch();
+				if (c == keyEnter)
+					break;
 				char character = static_cast<char>(c);
 				if (c == keyBackspace)
 				{
