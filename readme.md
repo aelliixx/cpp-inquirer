@@ -105,8 +105,17 @@ Password questions hide user input.
 
 ![](assets/password.png)
 ```cpp
-inquirer.add_question({ "number", "Enter your contact details:", alx::Type::password });
+inquirer.add_question({ "password", "Enter your password:", alx::Type::password });
 ```
+You can keep asking for a password if it doesn't meet your criteria like this:
+
+```cpp
+std::string pass;
+alx::Question question{ "pass", "Password", alx::Type::password };
+while (pass.empty()) // Your criteria here
+    pass = question.ask(true);
+```
+This works for any other question type as well but would probably be most commonly used with passwords. 
 
 # Contributing
 
