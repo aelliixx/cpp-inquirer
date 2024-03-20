@@ -34,10 +34,10 @@ namespace alx {
 
 #ifdef _WIN32
 static int const keyDw = 80;
-	static int const keyUp = 72;
-	static int const keySx = 75;
-	static int const keyDx = 77;
-	static int const keyEnter = 13;
+static int const keyUp = 72;
+static int const keySx = 75;
+static int const keyDx = 77;
+static int const keyEnter = 13;
 #else
 static int const keyUp = 65;
 static int const keyDw = 66;
@@ -45,18 +45,20 @@ static int const keySx = 68;
 static int const keyDx = 67;
 static int const keyEnter = 13;
 #endif
+static int const keyBackspace = 127;
 
 class Inquirer;
 
 enum class Type
 {
-	text = 0,
-	integer = 1,
-	decimal = 2,
-	yesNo = 3,
-	confirm = 4,
-	options = 5,
-	regex = 6
+	text,
+	integer,
+	decimal,
+	yesNo,
+	confirm,
+	options,
+	regex,
+	password
 };
 
 class Question
@@ -233,6 +235,27 @@ public:
 			}
 			break;
 		}
+		case Type::password:
+		{
+			printQuestion();
+			std::string answer;
+			int c;
+			while (c != keyEnter)
+			{
+				c = getch();
+				char character = static_cast<char>(c);
+				if (c == keyBackspace)
+				{
+					if (!answer.empty()) 
+						answer = answer.substr(0, answer.length() - 1);
+					continue;
+				}
+				answer += character;
+			}
+			std::cout << '\n';
+			m_answer = answer;
+			break;
+		}
 		case Type::regex:
 		{
 			printQuestion();
@@ -352,7 +375,34 @@ public:
 	{
 		for (const auto& q : m_questions)
 		{
-			std::cout << q.second.m_question << " " << static_cast<int>(q.second.m_type) << '\n';
+			std::cout << "Key: " << q.second.m_key << ", question: " << q.second.m_question << ", type: ";
+			switch (q.second.m_type)
+			{
+			case Type::text:
+				std::cout << "Text\n";
+				break;
+			case Type::integer:
+				std::cout << "Integer\n";
+				break;
+			case Type::decimal:
+				std::cout << "Decimal\n";
+				break;
+			case Type::yesNo:
+				std::cout << "Yes/No\n";
+				break;
+			case Type::confirm:
+				std::cout << "Confirm\n";
+				break;
+			case Type::options:
+				std::cout << "Options\n";
+				break;
+			case Type::regex:
+				std::cout << "Regex\n";
+				break;
+			case Type::password:
+				std::cout << "Password\n";
+				break;
+			}
 		}
 	}
 
