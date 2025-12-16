@@ -321,13 +321,13 @@ private:
 		return (*p == 0);
 	}
 
-	static unsigned wrap_int(unsigned int k, const unsigned lowerBound, const unsigned upperBound)
+	static int wrap_int(int k, const int lowerBound, const int upperBound)
 	{
-		const unsigned range_size = upperBound - lowerBound + 1;
-
+		const int range_size = upperBound - lowerBound + 1;
+		
 		if (k < lowerBound)
 			k += range_size * ((lowerBound - k) / range_size + 1);
-
+		
 		return lowerBound + (k - lowerBound) % range_size;
 	}
 
